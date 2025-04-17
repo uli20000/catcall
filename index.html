@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KFC 問卷連結產生器</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #fefefe;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #d42113;
+    }
+    label, select, input, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #d42113;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    #result {
+      margin-top: 15px;
+      word-break: break-all;
+      background-color: #f8f8f8;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    #copyBtn {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🍗 KFC 問卷連結產生器</h2>
+
+  <label>門市代碼</label>
+  <input type="text" id="store" placeholder="請輸入門市代碼" />
+
+  <label>點餐方式 (K)</label>
+  <select id="k">
+    <option value="2">2 = 預定</option>
+    <option value="3">3 = 點餐機</option>
+    <option value="6">6 = 現場點餐</option>
+  </select>
+
+  <label>訂購方式 (O)</label>
+  <select id="o">
+    <option value="1">1 = 內用</option>
+    <option value="2">2 = 外帶</option>
+    <option value="3">3 = 車道</option>
+    <option value="4">4 = 外送</option>
+  </select>
+
+  <button onclick="generateLink()">🎯 產生問卷連結</button>
+
+  <div id="result"></div>
+  <button id="copyBtn" onclick="copyToClipboard()" style="display:none">📋 複製問卷連結</button>
+
+  <script>
+    function base64Encode(obj) {
+      return btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function generateLink() {
+      const store = document.getElementById('store').value.trim();
+      const k = document.getElementById('k').value;
+      const o = document.getElementById('o').value;
+
+      if (!store) {
+        alert('請輸入門市代碼');
+        return;
+      }
+
+      const now = new Date();
+      const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      const D = date.toISOString().slice(0, 10).replace(/-/g, '');
+      const H = String(Math.floor(Math.random() * (22 - 10 + 1)) + 10).padStart(2, '0');
+      const rand1 = String(Math.floor(Math.random() * 90) + 10);
+      const rand2 = String(Math.floor(Math.random() * 50) + 10);
+      const rand3 = String(Math.floor(Math.random() * 89) + 11);
+      const U = `TWI${store}${D}${H}${rand1}${rand2}${rand3}`;
+      const T = `${H}${String(Math.floor(Math.random() * 60)).padStart(2, '0')}${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`;
+
+      const data = {
+        S: `886KTWI${store}`,
+        U,
+        D,
+        T,
+        Country: "TW",
+        O: o,
+        M: "2",
+        K: k,
+        I: "2"
+      };
+
+      const q_eed = base64Encode(data);
+      const link = `https://customer.kfc-listens.com/jfe/form/SV_1R1VSPEYVPlV1JA?Q_EED=${q_eed}`;
+
+      document.getElementById('result').innerHTML = `<strong>產生連結：</strong><br><a href="${link}" target="_blank">${link}</a>`;
+      document.getElementById('copyBtn').style.display = 'block';
+      document.getElementById('copyBtn').setAttribute('data-link', link);
+    }
+
+    function copyToClipboard() {
+      const link = document.getElementById('copyBtn').getAttribute('data-link');
+      navigator.clipboard.writeText(link).then(() => {
+        alert('✅ 已複製到剪貼簿！');
+      });
+    }
+  </script>
+</body>
+</html>
